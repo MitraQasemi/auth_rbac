@@ -6,8 +6,8 @@ const bcrypt = require("bcrypt");
 const JWT = require("jsonwebtoken");
 
 const loginController = async (req, res) => {
-    const user = req.body;
-    res.send(await login(user));
+    const result = await login(req.body);
+    res.send(result);
 }
 
 module.exports = loginController;
