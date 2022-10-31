@@ -1,11 +1,10 @@
-const routes = require('./routes/routes.js');
+const loader = require("./loaders/index");
 
 const express = require("express");
+
 const app = express();
-app.use(express.json());
 
-app.use(routes);
-
-app.listen(3000,()=>{
-    console.log("on port 3000")
-})
+async function startServer() {
+    await loader(app);
+}
+startServer();

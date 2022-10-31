@@ -5,65 +5,70 @@ const bcrypt = require("bcrypt");
 const JWT = require("jsonwebtoken");
 
 const signup = async (user) => {
-    //check username
-    const {username, password, roles} = user;
-    const duplicate = await users.find({username})
-        .catch(error => console.log(error))
+    try {
+        //check username
+        const {username, password, roles} = user;
+        const duplicate = await users.find({username})
+            .catch(error => console.log(error))
 
-    if (duplicate.length !== 0) {
-        return "this user already exists";
+        if (duplicate.length !== 0) {
+            return "this user already exists";
+        }
+        //hash password
+        const hashedPassword = await bcrypt.hash(password, 10);
+        //create tokens
+        const rolesArray = Object.values(roles);
+        const accessToken = JWT.sign({
+                username,
+                roles: rolesArray
+            }, TOKEN_KEYS.access
+            , {expiresIn: 3600000})
+        const refreshToken = JWT.sign({
+                username,
+            }, TOKEN_KEYS.refresh
+            , {expiresIn: 3600000 * 1000})
+        await users.create({
+            username,
+            password: hashedPassword,
+            roles,
+            refreshToken
+        })
+        return accessToken;
+    } catch (e) {
+        throw e;
     }
-    //hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-    //create tokens
-    const rolesArray = Object.values(roles);
-    const accessToken = await JWT.sign({
-            username,
-            roles: rolesArray
-        }, TOKEN_KEYS.access
-        , {expiresIn: 3600000})
-    const refreshToken = await JWT.sign({
-            username,
-        }, TOKEN_KEYS.refresh
-        , {expiresIn: 3600000 * 1000})
-    await users.create({
-        username,
-        password: hashedPassword,
-        roles,
-        refreshToken
-    })
-    return accessToken;
 }
 
 const login = async (user) => {
-    const {username, password} = user;
-    const foundedUser = await users.find({username})
-        .catch(error => console.log(error))
-    if (foundedUser.length === 0) {
-        return "this user does not exist";
-    }
-    const isMatch = await bcrypt.compare(password, foundedUser[0].password);
-    if (!isMatch) {
-        return "wrong password ";
-    }
-    const rolesArray = Object.values(foundedUser[0].roles);
-    const accessToken = await JWT.sign({
-            username,
-            roles: rolesArray
-        }, TOKEN_KEYS.access
-        , {expiresIn: 3600000})
-    const refreshToken = await JWT.sign({
-            username,
-        }, TOKEN_KEYS.refresh
-        , {expiresIn: 3600000 * 1000})
+    try {
+        const {username, password} = user;
+        const foundedUser = await users.find({username})
+            .catch(error => console.log(error))
+        if (foundedUser.length === 0) {
+            return "this user does not exist";
+        }
+        const isMatch = await bcrypt.compare(password, foundedUser[0].password);
+        if (!isMatch) {
+            return "wrong password ";
+        }
+        const rolesArray = Object.values(foundedUser[0].roles);
+        const accessToken = JWT.sign({
+                username,
+                roles: rolesArray
+            }, TOKEN_KEYS.access
+            , {expiresIn: 3600000})
+        const refreshToken = JWT.sign({
+                username,
+            }, TOKEN_KEYS.refresh
+            , {expiresIn: 3600000 * 1000})
 
-    await users.findOneAndUpdate({username}, {
-        refreshToken: refreshToken
-    }).then(() => {
-        console.log("done")
-    })
-    console.log(accessToken);
-    return accessToken;
+        await users.findOneAndUpdate({username}, {
+            refreshToken: refreshToken
+        })
+        return accessToken;
+    } catch (e) {
+        throw e;
+    }
 }
 
 const refreshToken = async (token) => {
@@ -81,7 +86,7 @@ const refreshToken = async (token) => {
             , {expiresIn: 3600000})
         return accessToken;
     } catch (e) {
-        return "token invalid";
+        throw e;
     }
 }
 

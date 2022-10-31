@@ -1,4 +1,4 @@
-const TOKEN_KEYS = require("../config/token_keys");
+const TOKEN_KEYS = require("../../config/token_keys");
 
 const JWT = require("jsonwebtoken");
 
