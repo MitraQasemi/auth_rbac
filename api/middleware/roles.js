@@ -6,7 +6,7 @@ const verifyRoles = (...allowedRoles) => {
         }
         try {
             const allowedRolesArray = [...allowedRoles];
-            const rolesArray = Object.values(req.roles[0]);
+            const rolesArray = req.roles;
             let isFounded = allowedRolesArray.some( ai => rolesArray.includes(ai) );
             if (isFounded) next();
             else res.send("not allowed");

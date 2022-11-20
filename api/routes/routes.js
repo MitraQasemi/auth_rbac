@@ -31,7 +31,6 @@ const func = (app) => {
         } catch (e) {
             return next(e);
         }
-
     })
 
     route.get("/refreshToken", async (req, res, next) => {
@@ -45,8 +44,8 @@ const func = (app) => {
         } catch (e) {
             return next(e);
         }
-
     })
+
 }
 
 module.exports = func;
