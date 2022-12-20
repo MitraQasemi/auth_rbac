@@ -7,4 +7,5 @@ const app = express();
 async function startServer() {
     await loader(app);
 }
+
 startServer();
